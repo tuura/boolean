@@ -4,7 +4,8 @@ module Tuura.Boolean (
   module Tuura.Boolean.Parser,
   CNF (..), DNF (..), Literal (..),
   convertToCNF,
-  simplifyCNF, simplifyDNF, convertCNFtoDNF) where
+  simplifyCNF, simplifyDNF, convertCNFtoDNF,
+  getVars, eval) where
 
 import Data.List
 import Data.List.Extra
@@ -45,11 +46,14 @@ instance Pretty (Literal String) where
 convertToCNF :: Eq a => Expr a -> CNF a
 convertToCNF expr = cnf
   where
-    vars = nub $ toList expr
+    vars = getVars expr
     values = mapM (const [False, True]) vars
     fs = filter (not . eval expr . getValue vars) values
     cnf = CNF $ map (\v -> map (\f -> Literal (vars !! f) (not $ v !! f)) [0..(length vars - 1)]) fs
     getValue vs vals v = fromJust $ lookup v $ zip vs vals
+
+getVars :: Eq a => Expr a -> [a]
+getVars = nub . toList
 
 eval :: Expr a -> (a -> Bool) -> Bool
 eval (Var a) f     = f a
