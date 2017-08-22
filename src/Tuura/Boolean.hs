@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Tuura.Boolean (
+  module Text.PrettyPrint.HughesPJClass,
   module Tuura.Boolean.Parser,
   CNF (..), DNF (..), Literal (..),
   convertToCNF,
