@@ -3,7 +3,7 @@
 module Tuura.Boolean (
   module Tuura.Boolean.Parser,
   CNF (..), DNF (..), Literal (..),
-  convertToCNF, genConcepts,
+  convertToCNF,
   simplifyCNF, simplifyDNF, convertCNFtoDNF) where
 
 import Data.List
@@ -14,7 +14,6 @@ import Data.Ord
 import Text.PrettyPrint.HughesPJClass
 
 import Tuura.Boolean.Parser
-import Tuura.Concept.Circuit
 
 newtype CNF a = CNF { fromCNF :: [[Literal a]] } deriving Show
 
@@ -51,17 +50,6 @@ convertToCNF expr = cnf
     fs = filter (not . eval expr . getValue vars) values
     cnf = CNF $ map (\v -> map (\f -> Literal (vars !! f) (not $ v !! f)) [0..(length vars - 1)]) fs
     getValue vs vals v = fromJust $ lookup v $ zip vs vals
-
--- Generates a concept based on the effect transition, rise/fall as appropriate
-genConcepts :: Transition String -> [Literal String] -> String
-genConcepts effect e
-    | length e == 1 = causes ++ " ~> " ++ eff
-    | otherwise       = "[" ++ causes ++ "]" ++ " ~|~> " ++ eff
-  where
-    causes = unwords $ intersperse "," $ map direction e
-    direction (Literal a True)  = "rise " ++ a
-    direction (Literal a False) = "fall " ++ a
-    eff   = (if newValue effect then "rise " else "fall ") ++ signal effect
 
 eval :: Expr a -> (a -> Bool) -> Bool
 eval (Var a) f     = f a
