@@ -10,7 +10,8 @@ import Control.Applicative hiding ((<|>), many)
 import Control.Monad
 import Prelude hiding (not, or, and)
 
-data Expr a = Var a
+data Expr a = Val Bool
+          | Var a
           | Not (Expr a)
           | And (Expr a) (Expr a)
           | Or (Expr a) (Expr a)
