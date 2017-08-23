@@ -18,7 +18,7 @@ source-repository head
 library
     hs-source-dirs:   src
     exposed-modules:  Tuura.Boolean.Parser,
-                      Tuura.Boolean,
+                      Tuura.Boolean
     build-depends:    base >= 4.8 && < 5,
                       bifunctors <5.4 || >5.4,
                       containers == 0.5.*,
