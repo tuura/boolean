@@ -57,6 +57,7 @@ getVars :: Eq a => Expr a -> [a]
 getVars = nub . toList
 
 eval :: Expr a -> (a -> Bool) -> Bool
+eval (Val a) _     = a
 eval (Var a) f     = f a
 eval (Not a) f     = not (eval a f)
 eval (And a b) f   = eval a f && eval b f
