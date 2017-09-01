@@ -18,15 +18,13 @@ isSelfDual func = f == fd
 -- Descending order [2^n - 1 .. 0]
 getSelfDuals :: Int -> [[Bool]]
 getSelfDuals 0 = [[]]
-getSelfDuals n = good
+getSelfDuals n = map (concat . unpackTuple . reverseSnd) unzipped
     where cells = 2^n
           halfCells = cells `div` 2
-          possibles = replicateM cells [True,False]
-          top = take halfCells
-          bot = reverse . drop halfCells
-          testMutex x = (not . or) (zipWith (&&) (top x) (bot x))
-          good = [ x | x <- possibles, count x == halfCells, testMutex x]
-          count = length . filter (==False)
+          possibles = replicateM halfCells [(True,False), (False, True)]
+          unzipped = map unzip possibles
+          reverseSnd (a, b) = (a, reverse b)
+          unpackTuple (a, b) = [a, b]
 
 parseToCNF :: String -> CNF String
 parseToCNF func =
