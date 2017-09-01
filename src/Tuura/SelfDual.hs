@@ -1,9 +1,9 @@
 module Tuura.SelfDual (
-    isSelfDual, getSelfDuals) where
+  parseToDNF, isSelfDual, getSelfDuals) where
 
-import Control.Monad (replicateM)
-import Data.Either (isRight)
-import Data.List (sort)
+import Control.Monad
+import Data.Either
+import Data.List
 
 import Tuura.Boolean
 
@@ -15,22 +15,17 @@ isSelfDual func = f == fd
           final = sort . fromDNF
 
 -- List truth tables for all possible self-dual function of n variables
--- Descending order [2^n - 1 .. 0]
 getSelfDuals :: Int -> [[Bool]]
 getSelfDuals 0 = [[]]
-getSelfDuals n = map (concat . unpackTuple . reverseSnd) unzipped
+getSelfDuals n = map (concat . reverseSndUnpack) unzipped
     where cells = 2^n
           halfCells = cells `div` 2
-          possibles = replicateM halfCells [(True,False), (False, True)]
+          possibles = replicateM halfCells [(False, True), (True,False)]
           unzipped = map unzip possibles
-          reverseSnd (a, b) = (a, reverse b)
-          unpackTuple (a, b) = [a, b]
+          reverseSndUnpack (a, b) = [a, reverse b]
 
 parseToCNF :: String -> CNF String
-parseToCNF func =
-  case parseExpr func of
-    Right x -> (simplifyCNF . convertToCNF) x
-    Left _  -> error $ "Error parsing " ++ show func
+parseToCNF = simplifyCNF . convertToCNF . parseWrapper
 
 parseToDNF :: String -> DNF String
 parseToDNF = simplifyDNF . convertCNFtoDNF . simplifyCNF . parseToCNF
