@@ -2,7 +2,7 @@
 
 module Tuura.Boolean.Parser (
     Expr (..),
-    parseExpr, parseWrapper) where
+    parseExpr, parseWrapper,partialEval) where
 
 import Text.ParserCombinators.Parsec
 import Text.ParserCombinators.Parsec.Expr
@@ -17,6 +17,24 @@ data Expr a = Val Bool
           | Or (Expr a) (Expr a)
           | SubExpr (Expr a)
             deriving (Functor, Foldable, Traversable, Show)
+
+instance Applicative Expr where
+  pure = Var
+  Val False <*> _ = Val False 
+
+instance Monad Expr where
+  return = Var
+  Val False >>= _ = Val False
+
+  Val False >> _ = Val False
+  Val True >> e = e
+
+partialEval :: (a -> Maybe Bool) -> Expr a -> Expr a
+partialEval f expr = expr >>= substitute
+  where
+    substitute x = case f x of
+        Just bool -> Val bool
+        Nothing   -> Var x
 
 parseExpr :: String -> Either ParseError (Expr String)
 parseExpr = parse expr ""
