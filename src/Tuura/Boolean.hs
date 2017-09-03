@@ -1,10 +1,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Tuura.Boolean (
+  module Text.PrettyPrint.HughesPJClass,
   module Tuura.Boolean.Parser,
   CNF (..), DNF (..), Literal (..),
   convertToCNF,
-  simplifyCNF, simplifyDNF, convertCNFtoDNF) where
+  simplifyCNF, simplifyDNF, convertCNFtoDNF,
+  getVars, eval, eval') where
 
 import Data.List
 import Data.List.Extra
@@ -45,18 +47,47 @@ instance Pretty (Literal String) where
 convertToCNF :: Eq a => Expr a -> CNF a
 convertToCNF expr = cnf
   where
-    vars = nub $ toList expr
+    vars = getVars expr
     values = mapM (const [False, True]) vars
     fs = filter (not . eval expr . getValue vars) values
     cnf = CNF $ map (\v -> map (\f -> Literal (vars !! f) (not $ v !! f)) [0..(length vars - 1)]) fs
     getValue vs vals v = fromJust $ lookup v $ zip vs vals
 
+getVars :: Eq a => Expr a -> [a]
+getVars = nub . toList
+
 eval :: Expr a -> (a -> Bool) -> Bool
+eval (Val a) _     = a
 eval (Var a) f     = f a
 eval (Not a) f     = not (eval a f)
 eval (And a b) f   = eval a f && eval b f
 eval (Or a b) f    = eval a f || eval b f
 eval (SubExpr a) f = eval a f
+
+-- Partially appliable version of eval
+eval' :: Expr a -> (a -> Maybe Bool) -> Expr a
+eval' (Val a) _     = Val a
+eval' (Var a) f     = case f a of
+                        Just x  -> Val x
+                        Nothing -> Var a
+eval' (Not a) f     = case eval' a f of
+                        Val x -> Val $ not x
+                        x -> Not x
+eval' (And a b) f   = case (eval' a f, eval' b f) of
+                        (Val x, Val y) -> Val $ x && y
+                        (Val x, y    ) -> if' x y (Val False)
+                        (x    , Val y) -> if' y x (Val False)
+                        (x    , y    ) -> And x y
+eval' (Or a b) f    = case (eval' a f, eval' b f) of
+                        (Val x, Val y) -> Val $ x || y
+                        (Val x, y    ) -> if' x (Val True) y
+                        (x    , Val y) -> if' y (Val True) x
+                        (x    , y    ) -> Or x y
+eval' (SubExpr a) f = eval' a f
+
+if' :: Bool -> a -> a -> a
+if' True  x _ = x
+if' False _ y = y
 
 invert :: Literal a -> Literal a
 invert l = Literal (variable l) (not $ polarity l)
