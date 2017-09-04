@@ -17,6 +17,19 @@ data Expr a = Var a
           | SubExpr (Expr a)
             deriving (Functor, Foldable, Traversable, Show)
 
+instance Applicative Expr where
+    pure  = Var
+    (<*>) = ap
+
+instance Monad Expr where
+    return = pure
+
+    Var a     >>= f = f a
+    Not x     >>= f = Not     (x >>= f)
+    And x y   >>= f = And     (x >>= f) (y >>= f)
+    Or  x y   >>= f = Or      (x >>= f) (y >>= f)
+    SubExpr x >>= f = SubExpr (x >>= f)
+
 parseExpr :: String -> Either ParseError (Expr String)
 parseExpr = parse expr ""
   where expr = buildExpressionParser operators term <?> "compound expression"
