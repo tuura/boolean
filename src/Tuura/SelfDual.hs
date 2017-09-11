@@ -2,7 +2,6 @@ module Tuura.SelfDual (
   parseToDNF, isSelfDual, getSelfDuals) where
 
 import Control.Monad
-import Data.Either
 import Data.List
 
 import Tuura.Boolean
