@@ -1,7 +1,7 @@
 name:          tuura-boolean
 version:       0.0.1
 synopsis:      Boolean manipulation
-license:       BSD3
+license:       MIT
 license-file:  LICENSE
 author:        Tuura authors (see AUTHORS file)
 maintainer:    Andrey Mokhov <andrey.mokhov@gmail.com>, github: @snowleopard
