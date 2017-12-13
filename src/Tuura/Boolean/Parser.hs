@@ -33,10 +33,12 @@ instance Monad Expr where
 parseExpr :: String -> Either ParseError (Expr String)
 parseExpr = parse expr ""
   where expr = buildExpressionParser operators term <?> "compound expression"
-        term = parens expr <|> variable <?> "full expr ession"
+        term = parens expr <|> variable <?> "full expression"
         operators = [ [Prefix (string "NOT" >> spaces >> return Not),
                        Prefix (string "!" >> return Not),
-                       Postfix (string "'" >> return Not)]
+                       Postfix (string "'" >> spaces >> return Not),
+                       Postfix (string "-" >> spaces >> return Not),
+                       Postfix (string "+" >> spaces >> return (Not . Not))]
                     , [binary "AND" And, binary "*" And, binary "&" And],
                       [binary "OR" Or, binary "|" Or, binary "+" Or] ]
           where binary n c = Infix (string n *> spaces *> pure c) AssocLeft
