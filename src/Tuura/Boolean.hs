@@ -12,6 +12,7 @@ import Data.Foldable
 import Data.Maybe
 import Data.Ord
 import Text.PrettyPrint.HughesPJClass
+import qualified Text.PrettyPrint.HughesPJClass as T ((<>))
 
 import Tuura.Boolean.Parser
 
@@ -40,7 +41,7 @@ data Literal a = Literal { variable :: a, polarity :: Bool } deriving (Eq, Ord, 
 
 instance Pretty (Literal String) where
   pPrint (Literal var True) = text var
-  pPrint (Literal var False) = char '!' <> text var
+  pPrint (Literal var False) = (T.<>) (char '!') (text var)
 
 convertToCNF :: Eq a => Expr a -> CNF a
 convertToCNF expr = cnf
